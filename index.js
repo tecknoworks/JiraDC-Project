@@ -32,6 +32,19 @@ app.get('/project', async (req, res) =>{
     res.json(record)
 })
 
+app.post('/allprojects', async (req, res) => {
+    let result = [];
+    console.log(req.body);
+    if (req.body.length) {
+        for (let index = 0; index < req.body.length; index++) {
+            const project = await Project.find({ '_id': req.body[index] })
+            result.push(project[0]);
+        }
+    }
+
+    res.json(result)
+})
+
 app.get('/project/kanban', async (req, res) =>{
     const record= await Project.find({'type':'kanban'}).exec()
     console.log(record)
