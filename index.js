@@ -20,7 +20,8 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 app.post('/project', async (req, res) => {
     let newProject = req.body
-    var addProject=new Project({name:newProject.name, type:newProject.type, user_id:newProject.user_id})
+    let key = req.body.name.substring(0,3).toUpperCase() 
+    var addProject=new Project({name:newProject.name, type:newProject.type, key:key,user_id:newProject.user_id})
     await Project.create(addProject)
     res.send(newProject)
 })
@@ -28,13 +29,18 @@ app.post('/project', async (req, res) => {
 app.get('/project', async (req, res) =>{
     // const record= await Project.find({'type':req.query.type}).exec()
     const record= await Project.find({})
+    res.json(record)
+})
+app.post('/projectId', async (req, res) =>{
+    // const record= await Project.find({'type':req.query.type}).exec()
+    const record= await Project.find({"_id": req.body._id})
     console.log(record)
     res.json(record)
 })
 
+
 app.post('/allprojects', async (req, res) => {
     let result = [];
-    console.log(req.body);
     if (req.body.length) {
         for (let index = 0; index < req.body.length; index++) {
             const project = await Project.find({ '_id': req.body[index] })
@@ -47,7 +53,6 @@ app.post('/allprojects', async (req, res) => {
 
 app.get('/project/kanban', async (req, res) =>{
     const record= await Project.find({'type':'kanban'}).exec()
-    console.log(record)
     res.json(record)
 })
 app.get('/project/scrum', async (req, res) =>{
