@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var cors = require('cors')
+const fetch = require("node-fetch");
 const app = express()
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -9,7 +10,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.raw());
 
 const Project = require('./models/project')
-
+const baseUrl = 'http://localhost';
+const usersServiceUrl = baseUrl + ':8082';
 const port = 8083
 
 var mongoDB = 'mongodb+srv://cata:cata@cluster0.wcbqw.mongodb.net/first?retryWrites=true&w=majority';
@@ -27,9 +29,35 @@ app.post('/project', async (req, res) => {
 
 app.get('/project', async (req, res) =>{
     // const record= await Project.find({'type':req.query.type}).exec()
+
+
     const record= await Project.find({})
-    console.log(record)
-    res.json(record)
+    userIds=record.map(p => p.user_id);
+    users=[]
+    await fetch(usersServiceUrl + '/allusersselected', 
+    { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userIds)
+    })
+    .then(res => res.json())
+    .then(data => users = data);
+
+    result=[]
+    for (let index = 0; index < record.length; index++) {
+
+        const componentDTO = {
+            _id: record[index]._id,
+            name: record[index].name,
+            type: record[index].type,
+            user_id: users[index].username,
+        }
+        result.push(componentDTO);   
+    }  
+
+    res.json(result)
 })
 
 app.post('/allprojects', async (req, res) => {
