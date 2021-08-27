@@ -9,6 +9,10 @@ const model = mongoose.Schema({
         type: String,
         required: true
     },
+    key:{
+        type: String,
+        required: false
+    },
     user_id: {
         type: String,
         required: true
