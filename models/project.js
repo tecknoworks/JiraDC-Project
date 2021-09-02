@@ -16,6 +16,10 @@ const model = mongoose.Schema({
     user_id: {
         type: String,
         required: true
+    },
+    git_url: {
+        type: String,
+        required: true
     }
 });
 
