@@ -23,7 +23,8 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 app.post('/project', async (req, res) => {
     let newProject = req.body
     let key = req.body.name.substring(0,3).toUpperCase() 
-    var addProject=new Project({name:newProject.name, type:newProject.type, key:key,user_id:newProject.user_id})
+    let git_url="https://api.github.com/repos/"+newProject.owner+"/"+newProject.repository+"/commits"
+    var addProject=new Project({name:newProject.name, type:newProject.type, key:key,user_id:newProject.user_id,git_url:git_url,owner:newProject.owner,repository:newProject.repository})
     await Project.create(addProject)
     res.send(newProject)
 })
@@ -51,6 +52,7 @@ app.get('/project', async (req, res) =>{
             _id: record[index]._id,
             name: record[index].name,
             type: record[index].type,
+            key:record[index].key,
             user_id: users[index].username,
         }
         result.push(componentDTO);   
@@ -80,16 +82,93 @@ app.post('/allprojects', async (req, res) => {
 
 app.get('/project/kanban', async (req, res) =>{
     const record= await Project.find({'type':'kanban'}).exec()
-    res.json(record)
+    userIds=record.map(p => p.user_id);
+    users=[]
+    await fetch(usersServiceUrl + '/allusersselected', 
+    { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userIds)
+    })
+    .then(res => res.json())
+    .then(data => users = data);
+
+    result=[]
+    for (let index = 0; index < record.length; index++) {
+
+        const componentDTO = {
+            _id: record[index]._id,
+            name: record[index].name,
+            type: record[index].type,
+            key:record[index].key,
+            user_id: users[index].username,
+        }
+        result.push(componentDTO);   
+    }  
+
+    res.json(result)
 })
 app.get('/project/scrum', async (req, res) =>{
     const record= await Project.find({'type':'scrum'}).exec()
-    res.json(record)
+    userIds=record.map(p => p.user_id);
+    users=[]
+    await fetch(usersServiceUrl + '/allusersselected', 
+    { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userIds)
+    })
+    .then(res => res.json())
+    .then(data => users = data);
+
+    result=[]
+    for (let index = 0; index < record.length; index++) {
+
+        const componentDTO = {
+            _id: record[index]._id,
+            name: record[index].name,
+            type: record[index].type,
+            key:record[index].key,
+            user_id: users[index].username,
+        }
+        result.push(componentDTO);   
+    }  
+
+    res.json(result)
 })
 app.get('/project/bugtracking', async (req, res) =>{
-
     const record= await Project.find({'type':'bug tracking '}).exec()
-    res.json(record)
+    userIds=record.map(p => p.user_id);
+    users=[]
+    await fetch(usersServiceUrl + '/allusersselected', 
+    { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userIds)
+    })
+    .then(res => res.json())
+    .then(data => users = data);
+
+    result=[]
+    for (let index = 0; index < record.length; index++) {
+
+        const componentDTO = {
+            _id: record[index]._id,
+            name: record[index].name,
+            type: record[index].type,
+            key:record[index].key,
+            user_id: users[index].username,
+        }
+        result.push(componentDTO);   
+    }  
+
+    res.json(result)
 })
 
 app.listen(port, () => {
